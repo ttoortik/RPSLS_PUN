@@ -1,5 +1,6 @@
 # RPSLS_PUN
 Проект находится в файле в пути Assests/RPSLSMain.unity
+
 Да и вообще, все самое основное находится в папке Assets: Скрипты и спрайты
 
 При загрузке проекта Photon Unity Networking попросит AppId, вводите:
