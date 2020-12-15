@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 using ExitGames.Client.Photon;
 
-public class RpsDemoConnect : PunBehaviour
+public class GameConnect : PunBehaviour
 {
     public InputField InputField;
     public string UserId;
