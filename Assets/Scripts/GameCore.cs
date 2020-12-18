@@ -9,9 +9,7 @@ using ExitGames.Client.Photon;
 
 #pragma warning disable 649 
 
-// the Photon server assigns a ActorNumber (player.ID) to each player, beginning at 1
-// for this game, we don't mind the actual number
-// this game uses player 0 and 1, so clients need to figure out their number somehow
+
 public class GameCore : PunBehaviour, IPunTurnManagerCallbacks
 {
 
@@ -310,7 +308,8 @@ public class GameCore : PunBehaviour, IPunTurnManagerCallbacks
 	
     public void OnEndTurn()
     {
-        this.StartCoroutine("ShowResultsBeginNextTurnCoroutine");
+        if(PhotonNetwork.room.PlayerCount==2)
+            this.StartCoroutine("ShowResultsBeginNextTurnCoroutine");
     }
 
     public IEnumerator ShowResultsBeginNextTurnCoroutine()
@@ -450,44 +449,31 @@ public class GameCore : PunBehaviour, IPunTurnManagerCallbacks
 
     #region Handling Of Buttons
     
-    public void OnClickSign(Hand hand)
+    public void OnClickSign(int hand)
     {
-        this.MakeTurn(hand);
-    }
-
-    public void OnClickPaper()
-    {
-       this.MakeTurn(Hand.Paper);
-    }
-
-    public void OnClickScissors()
-    {
-        this.MakeTurn(Hand.Scissors);
-    }
-    public void OnClickLizard()
-    {
-        this.MakeTurn(Hand.Lizard);
-    }
-    public void OnClickSpok()
-    {
-        this.MakeTurn(Hand.Spok);
+        this.MakeTurn((Hand)hand);
     }
 
     public void OnClickConnect()
     {
         PhotonNetwork.ConnectUsingSettings(null);
-        PhotonHandler.StopFallbackSendAckThread();  // this is used in the demo to timeout in background!
+        PhotonHandler.StopFallbackSendAckThread();  
     }
     
     public void OnClickReConnectAndRejoin()
     {
         PhotonNetwork.ReconnectAndRejoin();
-        PhotonHandler.StopFallbackSendAckThread();  // this is used in the demo to timeout in background!
+        PhotonHandler.StopFallbackSendAckThread();  
+    }
+
+    public void Leave()
+    {
+        PhotonNetwork.LeaveRoom();
     }
 
     #endregion
 
-	void RefreshUIViews()
+    void RefreshUIViews()
 	{
 
 		ConnectUiView.gameObject.SetActive(!PhotonNetwork.inRoom);
@@ -549,8 +535,5 @@ public class GameCore : PunBehaviour, IPunTurnManagerCallbacks
     {
         this.DisconnectedPanel.gameObject.SetActive(true);
     }
-     public void Leave()
-    {
-        PhotonNetwork.LeaveRoom();
-    }
+
 }

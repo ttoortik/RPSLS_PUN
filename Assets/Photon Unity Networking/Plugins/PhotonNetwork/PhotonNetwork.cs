@@ -2160,7 +2160,7 @@ public static class PhotonNetwork
             {
                 becomeInactive = false;//becomeInactive && room.PlayerTtl != 0; // in a room with playerTTL == 0, the operation "leave" will never turn a client inactive
             }
-            return networkingPeer.OpLeaveRoom(becomeInactive);
+            networkingPeer.Disconnect();
         }
 
         return true;
