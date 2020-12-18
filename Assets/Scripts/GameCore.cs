@@ -127,15 +127,9 @@ public class GameCore : PunBehaviour, IPunTurnManagerCallbacks
 			Destroy(this.gameObject);
 		}
 
-        // for debugging, it's useful to have a few actions tied to keys:
         if (Input.GetKeyUp(KeyCode.Escape)&&PhotonNetwork.inRoom)
         {
             PhotonNetwork.LeaveRoom();
-        }
-        if (Input.GetKeyUp(KeyCode.C))
-        {
-            PhotonNetwork.ConnectUsingSettings(null);
-            PhotonHandler.StopFallbackSendAckThread();
         }
 
 	
@@ -144,7 +138,6 @@ public class GameCore : PunBehaviour, IPunTurnManagerCallbacks
 			return;
 		}
 
-		// disable the "reconnect panel" if PUN is connected or connecting
 		if (PhotonNetwork.connected && this.DisconnectedPanel.gameObject.GetActive())
 		{
 			this.DisconnectedPanel.gameObject.SetActive(false);
@@ -179,16 +172,15 @@ public class GameCore : PunBehaviour, IPunTurnManagerCallbacks
 		}
 
 		this.UpdatePlayerTexts();
-
-        // show local player's selected hand
+        //Показывает выбор локального игрока
         Sprite selected = SelectionToSprite(this.localSelection);
         if (selected != null)
         {
             this.localSelectionImage.gameObject.SetActive(true);
             this.localSelectionImage.sprite = selected;
         }
-
-        // remote player's selection is only shown, when the turn is complete (finished by both)
+       
+        //Показывает выбор противника или показывает случайные фигуры, пока противник не выбрал
         if (this.turnManager.IsCompletedByAll)
         {
             selected = SelectionToSprite(this.remoteSelection);
@@ -207,10 +199,8 @@ public class GameCore : PunBehaviour, IPunTurnManagerCallbacks
                 this.remoteSelectionImage.color = new Color(1, 1, 1, 0);
             }
 
-            // if the turn is not completed by all, we use a random image for the remote hand
             else if (this.turnManager.Turn > 0 && !this.turnManager.IsCompletedByAll)
             {
-                // alpha of the remote hand is used as indicator if the remote player "is active" and "made a turn"
                 PhotonPlayer remote = PhotonNetwork.player.GetNext();
                 float alpha = 0.5f;
                 if (this.turnManager.GetPlayerFinishedTurn(remote))
@@ -231,6 +221,7 @@ public class GameCore : PunBehaviour, IPunTurnManagerCallbacks
 
     #region TurnManager Callbacks
 
+    //Начало хода
     public void OnTurnBegins(int turn)
     {
         Debug.Log("OnTurnBegins() turn: "+ turn);
@@ -246,7 +237,7 @@ public class GameCore : PunBehaviour, IPunTurnManagerCallbacks
 		ButtonCanvasGroup.interactable = true;
     }
 
-
+    //После конца хода
     public void OnTurnCompleted(int obj)
     {
         Debug.Log("OnTurnCompleted: " + obj);
@@ -265,7 +256,7 @@ public class GameCore : PunBehaviour, IPunTurnManagerCallbacks
     }
 
 
-    // when a player made the last/final move in a turn
+    // Когда игрок закончил ход
     public void OnPlayerFinished(PhotonPlayer photonPlayer, int turn, object move)
     {
         Debug.Log("OnTurnFinished: " + photonPlayer + " turn: " + turn + " action: " + move);
@@ -295,7 +286,7 @@ public class GameCore : PunBehaviour, IPunTurnManagerCallbacks
     {
         if (this.result == ResultType.LocalWin)
         {
-            PhotonNetwork.player.AddScore(1);   // this is an extension method for PhotonPlayer. you can see it's implementation
+            PhotonNetwork.player.AddScore(1); 
         }
     }
 
@@ -304,7 +295,6 @@ public class GameCore : PunBehaviour, IPunTurnManagerCallbacks
     #region Core Gameplay Methods
 
     
-    /// <summary>Call to start the turn (only the Master Client will send this).</summary>
     public void StartTurn()
     {
         if (PhotonNetwork.isMasterClient)
@@ -327,7 +317,6 @@ public class GameCore : PunBehaviour, IPunTurnManagerCallbacks
     {
 		ButtonCanvasGroup.interactable = false;
 		IsShowingResults = true;
-       // yield return new WaitForSeconds(1.5f);
 
         if (this.result == ResultType.Draw)
         {
@@ -350,6 +339,7 @@ public class GameCore : PunBehaviour, IPunTurnManagerCallbacks
 		Debug.Log("EndGame");
     }
 
+    //Выбор победителя
     private void CalculateWinAndLoss()
     {
         this.result = ResultType.Draw;
@@ -371,26 +361,31 @@ public class GameCore : PunBehaviour, IPunTurnManagerCallbacks
         
         if (this.localSelection == Hand.Rock)
         {
-            this.result = (this.remoteSelection == Hand.Scissors|| this.remoteSelection == Hand.Lizard) ? ResultType.LocalWin : ResultType.LocalLoss;
+            this.result = (this.remoteSelection == Hand.Scissors|| this.remoteSelection == Hand.Lizard) ? 
+                ResultType.LocalWin : ResultType.LocalLoss;
         }
         if (this.localSelection == Hand.Paper)
         {
-            this.result = (this.remoteSelection == Hand.Rock|| this.remoteSelection == Hand.Spok) ? ResultType.LocalWin : ResultType.LocalLoss;
+            this.result = (this.remoteSelection == Hand.Rock|| this.remoteSelection == Hand.Spok) ?
+                ResultType.LocalWin : ResultType.LocalLoss;
         }
 
         if (this.localSelection == Hand.Scissors)
         {
-            this.result = (this.remoteSelection == Hand.Paper|| this.remoteSelection == Hand.Lizard) ? ResultType.LocalWin : ResultType.LocalLoss;
+            this.result = (this.remoteSelection == Hand.Paper|| this.remoteSelection == Hand.Lizard) ?
+                ResultType.LocalWin : ResultType.LocalLoss;
         }
 
         if (this.localSelection == Hand.Lizard)
         {
-            this.result = (this.remoteSelection == Hand.Paper || this.remoteSelection == Hand.Spok) ? ResultType.LocalWin : ResultType.LocalLoss;
+            this.result = (this.remoteSelection == Hand.Paper || this.remoteSelection == Hand.Spok) ?
+                ResultType.LocalWin : ResultType.LocalLoss;
         }
 
         if (this.localSelection == Hand.Spok)
         {
-            this.result = (this.remoteSelection == Hand.Scissors || this.remoteSelection == Hand.Rock) ? ResultType.LocalWin : ResultType.LocalLoss;
+            this.result = (this.remoteSelection == Hand.Scissors || this.remoteSelection == Hand.Rock) ? 
+                ResultType.LocalWin : ResultType.LocalLoss;
         }
     }
 
@@ -454,10 +449,10 @@ public class GameCore : PunBehaviour, IPunTurnManagerCallbacks
 
 
     #region Handling Of Buttons
-
-    public void OnClickRock()
+    
+    public void OnClickSign(Hand hand)
     {
-        this.MakeTurn(Hand.Rock);
+        this.MakeTurn(hand);
     }
 
     public void OnClickPaper()

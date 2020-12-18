@@ -31,19 +31,13 @@ public class GameConnect : PunBehaviour
             nickName = this.InputField.text;
 			PlayerPrefs.SetString(NickNamePlayerPrefsKey,nickName);
         }
-        //if (string.IsNullOrEmpty(UserId))
-        //{
-        //    this.UserId = nickName + "ID";
-        //}
+        
     
         if (PhotonNetwork.AuthValues == null)
         {
             PhotonNetwork.AuthValues = new AuthenticationValues();
         }
-        //else
-        //{
-        //    Debug.Log("Re-using AuthValues. UserId: " + PhotonNetwork.AuthValues.UserId);
-        //}
+        
 
 
 		PhotonNetwork.AuthValues.UserId = nickName;
@@ -55,42 +49,38 @@ public class GameConnect : PunBehaviour
         PhotonNetwork.playerName = nickName;
         PhotonNetwork.ConnectUsingSettings("0.5");
         
-        // this way we can force timeouts by pausing the client (in editor)
+    
         PhotonHandler.StopFallbackSendAckThread();
     }
 
 
     public override void OnConnectedToMaster()
     {
-        // after connect 
         this.UserId = PhotonNetwork.player.UserId;
-        ////Debug.Log("UserID " + this.UserId);
 
 		if (PlayerPrefs.HasKey(previousRoomPlayerPrefKey))
 		{
 			Debug.Log("getting previous room from prefs: ");
 			this.previousRoom = PlayerPrefs.GetString(previousRoomPlayerPrefKey);
-			PlayerPrefs.DeleteKey(previousRoomPlayerPrefKey); // we don't keep this, it was only for initial recovery
+			PlayerPrefs.DeleteKey(previousRoomPlayerPrefKey); 
 		}
 
 
-        // after timeout: re-join "old" room (if one is known)
         if (!string.IsNullOrEmpty(this.previousRoom))
         {
             Debug.Log("ReJoining previous room: " + this.previousRoom);
             PhotonNetwork.ReJoinRoom(this.previousRoom);
-            this.previousRoom = null;       // we only will try to re-join once. if this fails, we will get into a random/new room
+            this.previousRoom = null;
         }
         else
         {
-            // else: join a random room
             PhotonNetwork.JoinRandomRoom();
         }
     }
 
     public override void OnJoinedLobby()
     {
-        OnConnectedToMaster(); // this way, it does not matter if we join a lobby or not
+        OnConnectedToMaster(); 
     }
 
     public override void OnPhotonRandomJoinFailed(object[] codeAndMsg)
